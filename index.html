@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Web Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #0f172a, #0a0f1f);
+  --card: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.15);
+  --accent: #22c55e;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+.container{max-width:1200px;margin:auto;padding:20px;}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+header h1{font-size:28px;font-weight:700;}
+.tabs{display:flex;gap:10px;margin-bottom:20px;}
+.tab{padding:10px 20px;border-radius:12px;cursor:pointer;background:var(--card);border:1px solid var(--border);}
+.tab.active{background:var(--accent);color:#022c22;}
+.card{background:var(--card);border-radius:16px;padding:20px;backdrop-filter:blur(18px);border:1px solid var(--border);box-shadow:0 15px 40px rgba(0,0,0,0.4);min-height:400px;}
+textarea,input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:15px;outline:none;resize:none;margin-bottom:10px;}
+button{padding:12px 20px;border-radius:10px;border:none;font-weight:600;cursor:pointer;background:var(--accent);color:#022c22;margin-top:10px;}
+button.secondary{background:transparent;border:1px solid var(--border);color:var(--text);margin-left:10px;}
+iframe{width:100%;height:300px;border-radius:14px;border:1px solid var(--border);background:white;}
+pre{background:#020617;padding:12px;border-radius:12px;max-height:300px;overflow:auto;}
+.login-card{max-width:400px;margin:auto;}
+label{display:block;margin-bottom:4px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>✨ AI Web Builder</h1>
+<div>Login Demo</div>
+</header>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('cloud')">Cloud</div>
+<div class="tab" onclick="switchTab('code')">Code</div>
+<div class="tab" onclick="switchTab('settings')">Settings</div>
+</div>
+
+<div id="cloud" class="card tab-content">
+<h2>Cloud Projects</h2>
+<p>Manage your projects (demo)</p>
+<button>New Project</button>
+</div>
+
+<div id="code" class="card tab-content" style="display:none;">
+<h2>Code Editor</h2>
+<textarea id="prompt" placeholder="Describe your website here…"></textarea>
+<button onclick="generateWebsite()">Generate Website</button>
+<button class="secondary" onclick="copyCode()">Copy HTML</button>
+<h3>Live Preview</h3>
+<iframe id="preview"></iframe>
+<h3>Generated HTML</h3>
+<pre id="codeOutput">// HTML will appear here</pre>
+</div>
+
+<div id="settings" class="card tab-content" style="display:none;">
+<h2>Settings</h2>
+<label>Theme Color</label>
+<input type="color" value="#22c55e" id="themeColor">
+<label>Backend URL</label>
+<input type="text" id="backendURL" placeholder="https://yourbackendurl.com/generate">
+<p style="margin-top:10px;color:var(--muted)">Paste your deployed backend URL here</p>
+</div>
+
+<div class="card login-card">
+<h2>Login</h2>
+<label>Username</label>
+<input type="text" placeholder="Your username">
+<label>Password</label>
+<input type="password" placeholder="Password">
+<button>Login (demo)</button>
+</div>
+
+</div>
+
+<script>
+function switchTab(tab){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+document.querySelector('.tab[onclick*="'+tab+'"]').classList.add('active');
+document.getElementById(tab).style.display='block';
+}
+
+async function generateWebsite(){
+const prompt = document.getElementById('prompt').value;
+const url = document.getElementById('backendURL').value;
+if(!url){ alert("Enter backend URL!"); return; }
+const btn = event.target;
+btn.disabled = true;
+btn.textContent = "Generating...";
+try{
+const res = await fetch(url,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({prompt})
+});
+const data = await res.json();
+document.getElementById('preview').srcdoc = data.html;
+document.getElementById('codeOutput').textContent = data.html;
+}catch(e){
+alert("Error generating website. Check backend URL.");
+}
+btn.disabled = false;
+btn.textContent = "Generate Website";
+}
+
+function copyCode(){
+const text = document.getElementById('codeOutput').textContent;
+navigator.clipboard.writeText(text);
+alert('HTML copied!');
+}
+</script>
+</body>
+  </html>
